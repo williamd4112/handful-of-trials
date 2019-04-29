@@ -15,7 +15,11 @@ class CartpoleEnv(mujoco_env.MujocoEnv, utils.EzPickle):
     def __init__(self):
         utils.EzPickle.__init__(self)
         dir_path = os.path.dirname(os.path.realpath(__file__))
+        print(dir_path)
         mujoco_env.MujocoEnv.__init__(self, '%s/assets/cartpole.xml' % dir_path, 2)
+
+    def step(self, a):
+        return self._step(a)
 
     def _step(self, a):
         self.do_simulation(a, self.frame_skip)
@@ -37,7 +41,7 @@ class CartpoleEnv(mujoco_env.MujocoEnv, utils.EzPickle):
         return self._get_obs()
 
     def _get_obs(self):
-        return np.concatenate([self.model.data.qpos, self.model.data.qvel]).ravel()
+        return np.concatenate([self.data.qpos, self.data.qvel]).ravel()
 
     @staticmethod
     def _get_ee_pos(x):
