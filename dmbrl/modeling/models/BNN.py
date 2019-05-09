@@ -253,12 +253,19 @@ class BNN:
         else:
             epoch_range = trange(epochs, unit="epoch(s)", desc="Network training")
         for _ in epoch_range:
+            all_mse_losses = []
             for batch_num in range(int(np.ceil(idxs.shape[-1] / batch_size))):
                 batch_idxs = idxs[:, batch_num * batch_size:(batch_num + 1) * batch_size]
                 self.sess.run(
                     self.train_op,
                     feed_dict={self.sy_train_in: inputs[batch_idxs], self.sy_train_targ: targets[batch_idxs]}
                 )
+                mse_loss = self.sess.run(
+                        self.mse_loss,
+                        feed_dict={self.sy_train_in: inputs[batch_idxs], self.sy_train_targ: targets[batch_idxs]}
+                    )
+                all_mse_losses.append(mse_loss)
+
             idxs = shuffle_rows(idxs)
             if not hide_progress:
                 if holdout_ratio < 1e-12:
@@ -288,6 +295,7 @@ class BNN:
                             }
                         )
                     })
+            return all_mse_losses
 
     def predict(self, inputs, factored=False, *args, **kwargs):
         """Returns the distribution predicted by the model for each input vector in inputs.
